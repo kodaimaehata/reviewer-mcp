@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": ["Read(**/*.md)"],
+    "deny": ["Write(**/*)", "Shell(*)", "Read(.env*)", "Read(secrets/**)"]
+  }
+}
+

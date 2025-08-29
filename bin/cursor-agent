@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+// Stub for testing: emulate Cursor CLI JSON output
+// Ignores args and always returns a minimal valid review JSON
+
+const review = {
+  lgtm: true,
+  status: "approve",
+  rationale: "Stubbed approval for test.",
+  acceptance_checklist: [],
+  must_fixes: [],
+  suggestions: []
+};
+
+// Cursor CLI wrapper JSON expected by our parser: { result: stringified_review }
+const top = { result: JSON.stringify(review) };
+process.stdout.write(JSON.stringify(top));
+process.stdout.write("\n");
+process.exit(0);
+

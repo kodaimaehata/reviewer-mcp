@@ -22,11 +22,19 @@ async function callCursorAndParse(prompt: string, timeoutMs: number): Promise<an
   const allowPlainFallback =
     process.env.REVIEWER_MCP_ALLOW_PLAINTEXT_FALLBACK === '1' ||
     process.env.REVIEWER_MCP_ALLOW_PLAINTEXT_FALLBACK === 'true';
-  const { stdout } = await execWithTimeout(
-    'cursor-agent',
-    ['-p', '-f', '--model', 'gpt-5', '--output-format', 'json', prompt],
-    timeoutMs
-  );
+  let stdout: string;
+  try {
+    ({ stdout } = await execWithTimeout(
+      'cursor-agent',
+      ['-p', '--model', 'gpt-5', '--output-format', 'json', prompt],
+      timeoutMs
+    ));
+  } catch (e: any) {
+    if (e && (e.code === 'ENOENT' || /ENOENT/.test(e.message))) {
+      throw new Error("Cursor CLI not found: install 'cursor-agent'.");
+    }
+    throw e;
+  }
 
   // First parse: Cursor CLI JSON
   let top: any;

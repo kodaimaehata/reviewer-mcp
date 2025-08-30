@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runCursorReview } from './cursor.js';
 import { runCodexReview } from './codex.js';
-import type { ReviewInput } from './review.js';
+import { normalizeReviewInput, type ReviewInput } from './review.js';
 
 // MCP SDK
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -16,11 +16,20 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 
 // Resolve schema JSON relative to this file, allowing env override
-const schemaPathOverride = process.env.REVIEWER_MCP_SCHEMA_PATH;
-const cursorSchemaPath = schemaPathOverride
-  ? schemaPathOverride
+const schemaDirOverride = process.env.REVIEWER_MCP_SCHEMA_DIR;
+const cursorSchemaPathOverride =
+  process.env.REVIEWER_MCP_CURSOR_SCHEMA_PATH || process.env.REVIEWER_MCP_SCHEMA_PATH;
+const codexSchemaPathOverride = process.env.REVIEWER_MCP_CODEX_SCHEMA_PATH;
+const cursorSchemaPath = cursorSchemaPathOverride
+  ? cursorSchemaPathOverride
+  : schemaDirOverride
+  ? path.join(schemaDirOverride, 'cursor.review.input.schema.json')
   : fileURLToPath(new URL('./schemas/cursor.review.input.schema.json', import.meta.url));
-const codexSchemaPath = fileURLToPath(new URL('./schemas/codex.review.input.schema.json', import.meta.url));
+const codexSchemaPath = codexSchemaPathOverride
+  ? codexSchemaPathOverride
+  : schemaDirOverride
+  ? path.join(schemaDirOverride, 'codex.review.input.schema.json')
+  : fileURLToPath(new URL('./schemas/codex.review.input.schema.json', import.meta.url));
 const cursorInputSchema = JSON.parse(readFileSync(cursorSchemaPath, 'utf8'));
 const codexInputSchema = JSON.parse(readFileSync(codexSchemaPath, 'utf8'));
 
@@ -80,6 +89,7 @@ async function main() {
     if (!input || !Array.isArray(input.targets) || typeof input.review_request !== 'string') {
       throw new Error('Invalid input: missing required fields');
     }
+    normalizeReviewInput(input);
     validateTargets(input.targets);
     validateRefs('reference', input.reference);
     validateRefs('previous_reviews', input.previous_reviews);

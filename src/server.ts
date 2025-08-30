@@ -2,7 +2,9 @@ import { existsSync } from 'node:fs';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runCursorReview, type ReviewInput } from './cursor.js';
+import { runCursorReview } from './cursor.js';
+import { runCodexReview } from './codex.js';
+import type { ReviewInput } from './review.js';
 
 // MCP SDK
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -15,10 +17,12 @@ import {
 
 // Resolve schema JSON relative to this file, allowing env override
 const schemaPathOverride = process.env.REVIEWER_MCP_SCHEMA_PATH;
-const schemaFilePath = schemaPathOverride
+const cursorSchemaPath = schemaPathOverride
   ? schemaPathOverride
   : fileURLToPath(new URL('./schemas/cursor.review.input.schema.json', import.meta.url));
-const inputSchema = JSON.parse(readFileSync(schemaFilePath, 'utf8'));
+const codexSchemaPath = fileURLToPath(new URL('./schemas/codex.review.input.schema.json', import.meta.url));
+const cursorInputSchema = JSON.parse(readFileSync(cursorSchemaPath, 'utf8'));
+const codexInputSchema = JSON.parse(readFileSync(codexSchemaPath, 'utf8'));
 
 type Targets = { file: string; path: string }[];
 type Refs = { file: string; path: string }[];
@@ -54,7 +58,13 @@ async function main() {
           name: 'cursor.review',
           title: 'Run review via Cursor (GPT‑5)',
           description: 'Review deliverables via Cursor CLI (GPT‑5) and return review JSON only.',
-          inputSchema
+          inputSchema: cursorInputSchema
+        },
+        {
+          name: 'codex.review',
+          title: 'Run review via Codex CLI',
+          description: 'Review deliverables via Codex CLI and return review JSON only.',
+          inputSchema: codexInputSchema
         }
       ]
     });
@@ -62,7 +72,7 @@ async function main() {
 
   server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
     const { name, arguments: args } = request.params ?? {};
-    if (name !== 'cursor.review') {
+    if (name !== 'cursor.review' && name !== 'codex.review') {
       throw new Error(`Unknown tool: ${String(name)}`);
     }
 
@@ -74,7 +84,9 @@ async function main() {
     validateRefs('reference', input.reference);
     validateRefs('previous_reviews', input.previous_reviews);
 
-    const review = await runCursorReview(input);
+    const review = name === 'cursor.review'
+      ? await runCursorReview(input)
+      : await runCodexReview(input);
     const text = typeof review === 'string' ? review : JSON.stringify(review);
     return {
       content: [

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +14,12 @@ export type ReviewInput = {
   timeout_ms?: number;
   policy?: string | null;
 };
+
+export function normalizeReviewInput(input: { reference?: Reference[] }): void {
+  if (!Array.isArray(input.reference)) {
+    input.reference = [];
+  }
+}
 
 export function buildPrompt(input: ReviewInput): string {
   const tmplPathOverride = process.env.REVIEWER_MCP_TEMPLATE_PATH;
@@ -79,7 +85,6 @@ function looksLikeJson(s: string): boolean {
 function extractBalancedFrom(src: string, start: number): string | null {
   const open = src[start];
   if (open !== '{' && open !== '[') return null;
-  const closing = open === '{' ? '}' : ']';
   let depth = 0;
   let inStr = false;
   let esc = false;
@@ -135,7 +140,9 @@ export function persistReview(obj: any) {
     const ts = new Date();
     const pad = (n: number) => n.toString().padStart(2, '0');
     const name = `${ts.getFullYear()}${pad(ts.getMonth() + 1)}${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}${pad(ts.getSeconds())}.json`;
-    const path = join(process.cwd(), 'reviews', name);
+    const dir = join(process.cwd(), 'reviews');
+    mkdirSync(dir, { recursive: true });
+    const path = join(dir, name);
     writeFileSync(path, JSON.stringify(obj, null, 2), 'utf8');
   } catch {
     // best-effort; ignore persistence errors

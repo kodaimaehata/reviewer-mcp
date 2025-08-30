@@ -61,7 +61,8 @@ claude mcp add --scope project cursor-reviewer $(pwd)/bin/cursor-reviewer-mcp
 ## 環境変数
 - 通常は不要です。`cursor-agent` や `codex` が既にローカル設定済みであれば、環境変数は不要です。
 - 特殊な環境（CI 等）で `cursor-agent` が環境変数経由の認証を要求する場合のみ、`CURSOR_API_KEY` を設定してください。
-- Codex CLI のパスを明示する場合は `REVIEWER_MCP_CODEX_BIN`、追加フラグは `REVIEWER_MCP_CODEX_FLAGS` を設定します（空白で区切り、例: `--model gpt-4 --quiet`）。
+- Codex CLI のパスを明示する場合は `REVIEWER_MCP_CODEX_BIN`、追加フラグは `REVIEWER_MCP_CODEX_FLAGS` を設定します（シェル風の記法で引用可、例: `--model "gpt 4" --quiet`）。
+- スキーマを差し替える場合は `REVIEWER_MCP_SCHEMA_DIR`（ディレクトリを指定）、または個別に `REVIEWER_MCP_CURSOR_SCHEMA_PATH` / `REVIEWER_MCP_CODEX_SCHEMA_PATH` を指定します。
 - JSON以外の出力を許容する場合のみ `REVIEWER_MCP_ALLOW_PLAINTEXT_FALLBACK=1` を設定します（デフォルトは厳格にJSONのみ）。
 
 ## ツール仕様（要点）

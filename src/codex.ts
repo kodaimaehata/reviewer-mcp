@@ -5,6 +5,7 @@ import {
   persistReview,
   type ReviewInput
 } from './review.js';
+import { parseFlags } from './flags.js';
 
 export async function runCodexReview(input: ReviewInput): Promise<any> {
   const prompt = buildPrompt(input);
@@ -22,7 +23,7 @@ async function callCodexAndParse(prompt: string, timeoutMs: number): Promise<any
   const allowPlainFallback = process.env.REVIEWER_MCP_ALLOW_PLAINTEXT_FALLBACK === '1' ||
     process.env.REVIEWER_MCP_ALLOW_PLAINTEXT_FALLBACK === 'true';
   const bin = process.env.REVIEWER_MCP_CODEX_BIN || 'codex';
-  const flags = (process.env.REVIEWER_MCP_CODEX_FLAGS || '').split(/\s+/).filter(Boolean);
+  const flags = parseFlags(process.env.REVIEWER_MCP_CODEX_FLAGS || '');
   const args = ['exec', ...flags, prompt];
 
   let stdout: string;

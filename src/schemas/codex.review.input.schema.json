@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "codex.review.input",
+  "type": "object",
+  "required": ["targets", "reference", "review_request"],
+  "properties": {
+    "targets": {
+      "description": "レビュー対象ファイル一覧（表示名とパス）",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["file", "path"],
+        "properties": {
+          "file": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "previous_reviews": {
+      "description": "前回レビュー結果JSON（must_fixes/チェックリスト等）への参照一覧",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["file", "path"],
+        "properties": {
+          "file": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "reference": {
+      "description": "レビューで参照すべきドキュメント一覧（表示名とパス）",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["file", "path"],
+        "properties": {
+          "file": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "review_request": {
+      "description": "レビューワへの依頼文（自然文）",
+      "type": "string",
+      "minLength": 1
+    },
+    "timeout_ms": {
+      "description": "外部レビュー実行のタイムアウト（ミリ秒）",
+      "type": "number",
+      "default": 1800000
+    },
+    "policy": {
+      "description": "将来予約（LGTM基準等）。初期バージョンは null 固定・不使用",
+      "type": ["string", "null"],
+      "default": null
+    }
+  },
+  "additionalProperties": false
+}

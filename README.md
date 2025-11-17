@@ -2,6 +2,10 @@
 
 MCPサーバー「cursor-reviewer」。Claude Code から `cursor.review` または `codex.review` ツールを呼び出し、Cursor CLI（GPT‑5）または Codex CLI でレビューを実行し、レビューJSONのみを返します。仕様は `1.specs/spec.md`（v3）に準拠しています。
 
+<a href="https://glama.ai/mcp/servers/@kodaimaehata/reviewer-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@kodaimaehata/reviewer-mcp/badge" alt="Cursor Reviewer MCP server" />
+</a>
+
 ## 概要
 - ツール名: `cursor.review`, `codex.review`
 - 入力: `targets`, `reference`, `review_request`, `timeout_ms`（オプション）, `policy`（予約・null固定）
